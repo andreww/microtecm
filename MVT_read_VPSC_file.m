@@ -1,4 +1,4 @@
-% MVT_read_VPSC_file - Create a VPSC texture file 
+% MVT_read_VPSC_file - Read euler angles from a VPSC texture file 
 %
 % Given the name of a VPSC formatted texture file, return an array 
 % of Euler angles and the number of crystals in the file.
