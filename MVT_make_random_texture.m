@@ -5,9 +5,13 @@
 % 
 % Usage: 
 %     [ eulers ] = MVT_read_VPSC_file( nxtl )
+%         Use the default Matlab PRN generator.
+% 
+%     [ eulers ] = MVT_read_VPSC_file( nxtl, 'stream', @RandStream )
+%         Use the provided PRN generator (which must be 
+%         created by the user).
 %
 % See also: MVT_read_VPSC_file
-
 
 % Copyright (c) 2012, Andrew Walker
 % All rights reserved.
@@ -43,41 +47,39 @@
 % OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function [eulers] = MVT_make_random_texture(nxtl)
+function [eulers] = MVT_make_random_texture(nxtl, varargin)
 
-    phi = 2 * pi * rand(1,nxtl);
-    theta = asin(rand(1,nxtl));
-    psi = pi * (rand(1,nxtl)*2 - 1);
-    
-    R1 = zeros(3,3,nxtl) ;
-    R1(1,1,:) = 1;
-    R1(2,2,:) = cos(phi);
-    R1(2,3,:) = sin(phi);
-    R1(3,2,:) = -sin(phi);
-    R1(3,3,:) = cos(phi);
-    
-    R2 = zeros(3,3,nxtl) ;
-    R2(1,1,:) = cos(theta);
-    R2(2,3,:) = -sin(theta);
-    R2(2,2,:) = 1;
-    R2(3,1,:) = sin(theta);
-    R2(3,3,:) = cos(theta);
-    
-    R3 = zeros(3,3,nxtl) ;
-    R3(1,1,:) = cos(psi);
-    R3(1,2,:) = sin(psi);
-    R3(2,1,:) = -sin(psi);
-    R3(2,2,:) = cos(psi);
-    R3(3,3,:) = 1;
+    % Default PRN stream
+    stream = RandStream.getDefaultStream;
 
-    
- 
-    eulers = zeros(3,nxtl);
-    for i = 1:nxtl
-        %R = R3(:,:,i)*R2(:,:,i)*R1(:,:,i);
-        %[phi1, Phi, phi2] = MVT_rot_to_Euler(R);   
-        eulers(1,i) = (180.0/pi) *phi(i);
-        eulers(2,i) = (180.0/pi) *theta(i);
-        eulers(3,i) = (180.0/pi) *psi(i);
+    % Process the optional arguments
+    iarg = 1 ;
+    while iarg <= (length(varargin))
+        switch lower(varargin{iarg})
+            case 'stream'
+                stream = varargin{iarg+1} ;
+                iarg = iarg + 2 ;
+            otherwise
+                error(['Unknown option: ' varargin{iarg}]) ;
+        end
     end
+    
+    % Uniform random numbers between 0 and 1. We convert these
+    % into the Euler angles.
+    eulers = rand(stream,3,nxtl);
+    
+    % Convert phi1 and phi2 to degrees between 0 and 360. Note 
+    % that if Phi = 0 the orientation is determined by the sum of
+    % these two rotations, but the periodicity means the orentation
+    % is still uniformly distributed.
+    eulers(1,:) = eulers(1,:).*360.0;
+    eulers(3,:) = eulers(3,:).*360.0;
+    
+    % Phi can be between -90 and 90 degrees and cos(Phi) must
+    % be unformly distributed (the metric space is phi1, cos(Phi)
+    % phi2. So first make the number between -1 and 1 then take the
+    % arccos in degrees.
+    eulers(2,:) = (eulers(2,:).*2.0)-1.0;
+    eulers(2,:) = acosd(eulers(2,:));
+    
 end
