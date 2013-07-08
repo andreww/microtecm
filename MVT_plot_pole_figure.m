@@ -75,6 +75,7 @@ function MVT_plot_pole_figure(eulers, CS, SS, varargin)
     write_file = 0;
     filename = '';
     fileformat = '';
+    axes = [Miller(1,0,0),Miller(0,1,0),Miller(0,0,1)];
     
     % Process the optional arguments
     iarg = 1 ;
@@ -93,6 +94,9 @@ function MVT_plot_pole_figure(eulers, CS, SS, varargin)
                 filename = varargin{iarg+1} ;
                 fileformat = lower(varargin{iarg+2}) ;
                 iarg = iarg + 3 ;
+            case 'axes'
+                axes = varargin{iarg+1};
+                iarg=iarg+2;
             otherwise
                 error(['Unknown option: ' varargin{iarg}]) ;
         end
@@ -138,10 +142,10 @@ function MVT_plot_pole_figure(eulers, CS, SS, varargin)
     h = figure('Position',[1 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2]); 
     
     if fix_scale
-        plotpdf(odf,[Miller(1,0,0),Miller(0,1,0),Miller(0,0,1)], ...
+        plotpdf(odf,axes, ...
             'antipodal','silent', 'colorrange', scale_setting);
     else
-        plotpdf(odf,[Miller(1,0,0),Miller(0,1,0),Miller(0,0,1)], ...
+        plotpdf(odf,axes, ...
         'antipodal','silent');
     end
     
