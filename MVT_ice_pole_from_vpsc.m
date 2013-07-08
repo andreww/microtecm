@@ -64,14 +64,28 @@ function MVT_ice_pole_from_vpsc(filename, varargin)
     CS = symmetry('6/mmm', [4.523, 4.523, 7.367]);
     SS = symmetry('-1');
     
-    [eulers, ~] = MVT_read_VPSC_file(filename);
+    [alleulers, ~] = MVT_read_VPSC_file(filename);
     
-    if (nargin == 1)
-        MVT_plot_pole_figure(eulers, CS, SS, 'axes', ...
-            [Miller(1,1,-2,0) Miller(0,0,0,1)]);
+    if iscell(alleulers)
+        for i = 1:length(alleulers)
+            eulers = alleulers{i};
+            if (nargin == 1)
+                MVT_plot_pole_figure(eulers, CS, SS, 'axes', ...
+                    [Miller(1,1,-2,0) Miller(0,0,0,1)]);
+            else 
+                MVT_plot_pole_figure(eulers, CS, SS, ...
+                    'axes', [Miller(1,0,-1,0) Miller(0,0,0,1)], varargin{:});
+            end
+        end
     else
-        MVT_plot_pole_figure(eulers, CS, SS, ...
-            'axes', [Miller(1,0,-1,0) Miller(0,0,0,1)], varargin{:});
+        eulers = alleulers;
+        if (nargin == 1)
+            MVT_plot_pole_figure(eulers, CS, SS, 'axes', ...
+                [Miller(1,1,-2,0) Miller(0,0,0,1)]);
+        else
+            MVT_plot_pole_figure(eulers, CS, SS, ...
+                'axes', [Miller(1,0,-1,0) Miller(0,0,0,1)], varargin{:});
+        end
     end
 end
 
