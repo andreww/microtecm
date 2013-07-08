@@ -56,18 +56,21 @@ function [eulers, nxtl] = MVT_read_VPSC_file(filename)
     fgetl(fid); % Lengths of phase ellipsoid axes - ignore
     fgetl(fid); % Euler angles for phase ellipsoid - ignore
     L = sscanf(fgetl(fid), '%s %d'); % Convention and number of crystals
-    E = fscanf(fid, '%f');
-    fclose(fid);
-    
+
     % Get hold of header info
     assert((char(L(1))=='B'), ... % Check Euler angle convention
         'Could not read VPSC file - not Bunge format\n');
     nxtl = L(2); % Number of crystals
+
+    % Read this set of Euler angles...
+    E = fscanf(fid, '%g %g %g %g', [4 nxtl]);
     
     % Build Euler angles array.
     eulers = zeros(3,nxtl);
-    eulers(1,:) = E(1:4:4*nxtl);
-    eulers(2,:) = E(2:4:4*nxtl);
-    eulers(3,:) = E(3:4:4*nxtl);
+    eulers(1,:) = E(1,:);
+    eulers(2,:) = E(2,:);
+    eulers(3,:) = E(3,:);
+    
+    fclose(fid);
    
 end
