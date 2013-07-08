@@ -1,7 +1,10 @@
 % MVT_read_VPSC_file - Read euler angles from a VPSC texture file 
 %
 % Given the name of a VPSC formatted texture file, return an array 
-% of Euler angles and the number of crystals in the file.
+% of Euler angles and the number of crystals in the file. If only one 
+% texture exists in the file return Matlab arrays for eulers and nxtl.
+% If multiple textures exists return cell arrays (where the indicies 
+% map to each texture.
 % 
 % Usage: 
 %     [eulers, nxtl] = MVT_read_VPSC_file(filename)
@@ -52,25 +55,58 @@ function [eulers, nxtl] = MVT_read_VPSC_file(filename)
 
     % Read data from the file
     fid = fopen(filename); % Read - the default
-    fgetl(fid); % Header line - ignore
-    fgetl(fid); % Lengths of phase ellipsoid axes - ignore
-    fgetl(fid); % Euler angles for phase ellipsoid - ignore
-    L = sscanf(fgetl(fid), '%s %d'); % Convention and number of crystals
-
-    % Get hold of header info
-    assert((char(L(1))=='B'), ... % Check Euler angle convention
-        'Could not read VPSC file - not Bunge format\n');
-    nxtl = L(2); % Number of crystals
-
-    % Read this set of Euler angles...
-    E = fscanf(fid, '%g %g %g %g', [4 nxtl]);
     
-    % Build Euler angles array.
-    eulers = zeros(3,nxtl);
-    eulers(1,:) = E(1,:);
-    eulers(2,:) = E(2,:);
-    eulers(3,:) = E(3,:);
+    blocks = 0; % Which number texture block are we on?
+    % Read the first header line (of this texture block). If this 
+    % returns -1 we are at the end of the file, which is OK.
+    while (fgetl(fid) ~= -1) % Header line - ignore
+        fgetl(fid); % Lengths of phase ellipsoid axes - ignore
+        fgetl(fid); % Euler angles for phase ellipsoid - ignore
+        L = sscanf(fgetl(fid), '%s %d'); % Convention and number of crystals
+
+        % Get hold of header info
+        assert((char(L(1))=='B'), ... % Check Euler angle convention
+            'Could not read VPSC file - not Bunge format\n');
+        tmp_nxtl = L(2); % Number of crystals
+
+        % Read this set of Euler angles...
+        E = fscanf(fid, '%g %g %g %g', [4 tmp_nxtl]);
     
+        % Build Euler angles array.
+        tmp_eulers = zeros(3,tmp_nxtl);
+        tmp_eulers(1,:) = E(1,:);
+        tmp_eulers(2,:) = E(2,:);
+        tmp_eulers(3,:) = E(3,:);
+        
+        % Bulild output...
+        blocks = blocks + 1;
+        if blocks == 1
+            eulers = tmp_eulers;
+            nxtl = tmp_nxtl;
+        elseif blocks == 2
+            % Multiple textures, bundle into a cell array...
+            eulers = {eulers};
+            nxtl = {nxtl};
+            eulers(2) = {tmp_eulers};
+            nxtl(2) = {nxtl};
+        else
+            eulers(blocks) = {tmp_eulers};
+            nxtl(blocks) = {tmp_nxtl};
+        end
+        
+        % Put the current file position in a sensible place.
+        % This is yucky.
+        frewind(fid);
+        for i = 1:blocks
+            fgetl(fid);
+            fgetl(fid);
+            fgetl(fid);
+            fgetl(fid);
+            for j = 1:tmp_nxtl % do we need to handle changing the number of xtals?
+                fgetl(fid);
+            end
+        end
+    end
     fclose(fid);
    
 end
