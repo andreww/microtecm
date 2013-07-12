@@ -9,14 +9,14 @@
 %     E_ij = (L_ij + L_ji) / 2 while for the skew symmetric rotation rate 
 %     tensor W_ij = (L_ij - L_ji) / 2. Note that L = E + W. 
 %
-%     e and w. Magnitudes of the principal strain rates and rotation vector
+%     e and w. Magnitudes of the principal strain rates and vorticity vector
 %     describing the rotation around the principal strain axes. These are
 %     found by diagonalization of the strain rate tensor:
 %         E^p = R^{-1} * E * R ,
 %     by finding the Eigenvalues (the diagonal components of E^p) and 
 %     Eigenvectors (columns of R) of E. These are sorted such that e(1)
 %     = E^p(1,1) is the largest (most positive) strain rate, and e(3) is
-%     the smallest (most negative) strain rate. The rotation rate vector
+%     the smallest (most negative) strain rate. The vorticity vector
 %     is then found by rotating the velocity gradient tensor onto this 
 %     frame of reference (L^p = R{^-1} * L * R) and extracting values. 
 %     The velocity gradient tensor on the frame of the principal axes can
