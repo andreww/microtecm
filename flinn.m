@@ -26,8 +26,11 @@ function flinn(file)
     figure
     subplot(2,1,1)
     [x, y] = flinn_xy(e);
+    maxplot = max([x y]);
     scatter(x, y ,20,1:length(x),'filled');
     hold on
+    plot([1 maxplot], [1 maxplot])
+    axis([1 maxplot 1 maxplot])
     [x, y] = flinn_xy(e_ss);
     scatter(x, y, 18, 'k', 's', 'filled');
     [x, y] = flinn_xy(e_ps);
