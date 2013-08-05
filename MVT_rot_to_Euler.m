@@ -1,7 +1,8 @@
 % MVT_rot_to_Euler - Convert rotation matrix to Euler angles 
 %
 % Given a rotation matrix, g, return the three Euler angles phi1, Phi, 
-% phi2 (Bunge notation, in degrees) representing the rotation.
+% phi2 (Bunge notation, in degrees) representing the rotation. Assume that
+% g is a 'passive' rotation (as usual for texture ananlysis).
 % 
 % Usage: 
 %     [phi1, Phi, phi2] = MVT_rot_to_Euler(g)
