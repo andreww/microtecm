@@ -63,37 +63,35 @@ function flinn(file)
     legend(file, 'simple shear', 'pure shear', ...
         'compression', 'extension');
     colorbar
-    xlabel('|v| / e_2 projected onto e_1, e_3 plane')
+    xlabel('|v| / e_1 projected onto e_1, e_3 plane')
     ylabel('|v_2| / e_1')
     
     % Knock up a pole figure...
     % Note that we transpose R here - which is what happens for texture
-    % pole figures too
+    % pole figures too - or not...
     e1axis(vecsize) = vector3d(0,0,0);
     e2axis(vecsize) = vector3d(0,0,0);
     e3axis(vecsize) = vector3d(0,0,0);
     for i = 1:vecsize
-        e1axis(i) = xvector*RR(1,1,i)+yvector*RR(1,2,i)+zvector*RR(1,3,i);
-        e2axis(i) = xvector*RR(2,1,i)+yvector*RR(2,2,i)+zvector*RR(2,3,i);
-        e3axis(i) = xvector*RR(3,1,i)+yvector*RR(3,2,i)+zvector*RR(3,3,i);
+        e1axis(i) = xvector*RR(1,1,i)+yvector*RR(2,1,i)+zvector*RR(3,1,i);
+        e2axis(i) = xvector*RR(1,2,i)+yvector*RR(2,2,i)+zvector*RR(3,2,i);
+        e3axis(i) = xvector*RR(1,3,i)+yvector*RR(2,3,i)+zvector*RR(3,3,i);
     end
     cmap=colormap(jet);
-    cmap = interp1((1:length(cmap))./(length(cmap)), cmap, (1:vecsize)./vecsize);
-    cmap(1,:) = 0.0;
-    cmap(1,3) = 0.5200;
+    cmap = interp1((1:length(cmap))./(length(cmap)), cmap, ((1:vecsize)./vecsize), 'linear', 'extrap');
     figure;
     for i = 1:vecsize
-        plot(e1axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:));%, 'antipodal');
+        plot(e1axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:), 'antipodal');
         hold on;
     end
     figure;
     for i = 1:vecsize
-        plot(e2axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:));%, 'antipodal');
+        plot(e2axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:), 'antipodal');
         hold on;
     end
     figure;
     for i = 1:vecsize
-        plot(e3axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:));%, 'antipodal');
+        plot(e3axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:), 'antipodal');
         hold on;
     end
 end
