@@ -23,8 +23,8 @@ function flinn(file)
     [~, ~, e_ae, v_ae, ~] = MVT_decompose_Lijs(l_ae);
     
     % Plot the flinn diagram
-    figure
-    subplot(2,1,1)
+    figure('Position',[100 100 500 1000])
+    subplot(3,3,1:3)
     [x, y] = flinn_xy(e);
     maxplot = max([x y]);
     vecsize = length(x);
@@ -32,39 +32,45 @@ function flinn(file)
     hold on
     plot([1 maxplot], [1 maxplot])
     axis([1 maxplot 1 maxplot])
-    [x, y] = flinn_xy(e_ss);
-    scatter(x, y, 18, 'k', 's', 'filled');
-    [x, y] = flinn_xy(e_ps);
-    scatter(x, y ,22, 'r', 's');
-    [x, y] = flinn_xy(e_ac);
-    scatter(x, y ,18, 'r', 's', 'filled');
-    [x, y] = flinn_xy(e_ae);
-    scatter(x, y ,22, 'k', 's');
+%     [x, y] = flinn_xy(e_ss);
+%     scatter(x, y, 18, 'k', 's', 'filled');
+%     [x, y] = flinn_xy(e_ps);
+%     scatter(x, y ,22, 'r', 's');
+%     [x, y] = flinn_xy(e_ac);
+%     scatter(x, y ,18, 'r', 's', 'filled');
+%     [x, y] = flinn_xy(e_ae);
+%     scatter(x, y ,22, 'k', 's');
     hold off
-    legend(file, 'simple shear', 'pure shear', ...
-        'compression', 'extension');
-    colorbar
+    %legend(file, 'simple shear', 'pure shear', ...
+    %    'compression', 'extension');
     xlabel('1+e_2 / 1+e_3')
     ylabel('1+e_1 / 1+e_2')
-    
-    subplot(2,1,2) 
+    pbaspect('manual');
+    pbaspect([1 1 1]);
+    title(file)
+    subplot(3,3,4:6) 
     [x, y] = vort_xy(v, e);
     scatter(x, y ,20,1:length(x),'filled');
-    hold on
-    [x, y] = vort_xy(v_ss, e_ss);
-    scatter(x, y, 18, 'k', 's', 'filled');
-    [x, y] = vort_xy(v_ps, e_ps);
-    scatter(x, y ,22, 'r', 's');
-    [x, y] = vort_xy(v_ac, e_ac);
-    scatter(x, y ,18, 'r', 's', 'filled');
-    [x, y] = vort_xy(v_ae, e_ae);
-    scatter(x, y ,22, 'k', 's')
-    hold off
-    legend(file, 'simple shear', 'pure shear', ...
-        'compression', 'extension');
-    colorbar
+    maxplot = max([x y]);
+%     hold on
+%     [x, y] = vort_xy(v_ss, e_ss);
+%     scatter(x, y, 18, 'k', 's', 'filled');
+%     [x, y] = vort_xy(v_ps, e_ps);
+%     scatter(x, y ,22, 'r', 's');
+%     [x, y] = vort_xy(v_ac, e_ac);
+%     scatter(x, y ,18, 'r', 's', 'filled');
+%     [x, y] = vort_xy(v_ae, e_ae);
+%     scatter(x, y ,22, 'k', 's')
+%     hold off
+    %legend(file, 'simple shear', 'pure shear', ...
+    %    'compression', 'extension');
+    axis([0 maxplot 0 maxplot])
     xlabel('|v| / e_1 projected onto e_1, e_3 plane')
     ylabel('|v_2| / e_1')
+    pbaspect('manual');
+    pbaspect([1 1 1]);
+    cba = colorbar('EastOutside');
+    set(get(cba,'title'),'string','Time step');
     
     % Knock up a pole figure...
     % Note that we transpose R here - which is what happens for texture
@@ -79,21 +85,24 @@ function flinn(file)
     end
     cmap=colormap(jet);
     cmap = interp1((1:length(cmap))./(length(cmap)), cmap, ((1:vecsize)./vecsize), 'linear', 'extrap');
-    figure;
+    subplot(3,3,7);
     for i = 1:vecsize
-        plot(e1axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:), 'antipodal');
+        plot(e1axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
         hold on;
     end
-    figure;
+    title('e1');
+    subplot(3,3,8);
     for i = 1:vecsize
-        plot(e2axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:), 'antipodal');
+        plot(e2axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
         hold on;
     end
-    figure;
+    title('e2');
+    subplot(3,3,9);
     for i = 1:vecsize
-        plot(e3axis(i),'MarkerSize',5,'MarkerFaceColor', cmap(i,:), 'antipodal');
+        plot(e3axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
         hold on;
     end
+    title('e3');
 end
 
 function [x, y] = flinn_xy(e)
