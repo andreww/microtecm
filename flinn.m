@@ -4,7 +4,20 @@ function flinn(file)
 
 
     Ls = MVT_read_Lij_file(file);
-    [~, ~, e, v, RR] = MVT_decompose_Lijs(Ls);
+%     Ls = zeros(3,3,4);
+%     Ls(:,:,1) = [0   0.0010     0;...
+%                  0     0     0;...
+%                  0     0     0];
+%     Ls(:,:,2) = [0   0.0005     0;...
+%                  0     0     0;...
+%                  0     0     0];
+%     Ls(:,:,3) = [0   0.00025   0;...
+%                  0     0     0;...
+%                  0     0     0];
+%     Ls(:,:,4) = [0   0.000125  0;...
+%                  0     0     0;...
+%                  0     0     0];
+    [Es, ~, e, v, RR] = MVT_decompose_Lijs(Ls);
     
     % Build some 'reference' points assuming maximum L in
     % input file (to fit on graph)
@@ -21,6 +34,41 @@ function flinn(file)
     % Axial extension with rotation around e(2)
     l_ae = [lr 0.0 lr*0.5; 0.0 -lr*0.5 0.0; -lr*0.5 0.0 -lr*0.5];
     [~, ~, e_ae, v_ae, ~] = MVT_decompose_Lijs(l_ae);
+    
+    % Calculate vorticity number
+    [~, II_E, ~] = MVT_strain_invariants(Es);
+    vortnum = zeros(size(II_E));
+    for i = 1:length(vortnum)
+        vortnum(i) = sqrt(v(1,i).^2+v(2,i).^2+v(3,i).^2)/sqrt(2*II_E(i));
+    end
+    % Plot vortnum flinn diag
+    figure()
+    [x, y] = flinn_xy(e);
+    maxplot = max([x y]);
+    %scatter(x, y ,20,1:length(x),'filled');
+    scatter(x, y ,20,vortnum,'filled');
+    hold on
+    plot([1 maxplot], [1 maxplot])
+    axis([1 maxplot 1 maxplot])
+%     [x, y] = flinn_xy(e_ss);
+%     scatter(x, y, 18, 'k', 's', 'filled');
+%     [x, y] = flinn_xy(e_ps);
+%     scatter(x, y ,22, 'r', 's');
+%     [x, y] = flinn_xy(e_ac);
+%     scatter(x, y ,18, 'r', 's', 'filled');
+%     [x, y] = flinn_xy(e_ae);
+%     scatter(x, y ,22, 'k', 's');
+    hold off
+    %legend(file, 'simple shear', 'pure shear', ...
+    %    'compression', 'extension');
+    xlabel('1+e_2 / 1+e_3')
+    ylabel('1+e_1 / 1+e_2')
+    pbaspect('manual');
+    pbaspect([1 1 1]);
+    cba = colorbar('EastOutside');
+    set(get(cba,'title'),'string','Vorticity number');
+    title(file)
+    
     
     % Plot the flinn diagram
     figure('Position',[100 100 500 1000])
