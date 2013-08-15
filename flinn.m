@@ -40,6 +40,10 @@ function flinn(file)
     vortnum = zeros(size(II_E));
     for i = 1:length(vortnum)
         vortnum(i) = sqrt(v(1,i).^2+v(2,i).^2+v(3,i).^2)/sqrt(2*II_E(i));
+        % Also normalise the elements of the vorticity
+        v(1,i) = v(1,i)/sqrt(2*II_E(i));
+        v(2,i) = v(2,i)/sqrt(2*II_E(i));
+        v(3,i) = v(3,i)/sqrt(2*II_E(i));
     end
     % Plot vortnum flinn diag
     figure()
@@ -113,8 +117,8 @@ function flinn(file)
     %legend(file, 'simple shear', 'pure shear', ...
     %    'compression', 'extension');
     axis([0 maxplot 0 maxplot])
-    xlabel('|v| / e_1 projected onto e_1, e_3 plane')
-    ylabel('|v_2| / e_1')
+    xlabel('|v| / II_E projected onto e_1, e_3 plane')
+    ylabel('|v_2| / II_E')
     pbaspect('manual');
     pbaspect([1 1 1]);
     cba = colorbar('EastOutside');
@@ -179,12 +183,12 @@ function [x, y] = vort_xy(v, e)
     if length(size(e)) == 2
         % Projection onto e(2) direction. For simple shear this is 1.0
         % For pure shear this is zero.
-        y = abs(v(2,:)./(2*e(1,:)));
+        y = abs(v(2,:));
         % Projection onto e(1)-e(3) plane
-        x = sqrt((v(1,:)./(2*e(1,:))).^2.0 + (v(3,:)./(2*e(1,:))).^2.0);
+        x = sqrt(v(1,:).^2.0 + v(3,:).^2.0);
     elseif length(size(e)) == 1
-        y = abs(v(2)./(2*e(1)));
-        x = sqrt((v(1)./(2*e(1))).^2.0 + (v(3)./(2*e(1))).^2.0);
+        y = abs(v(2));
+        x = sqrt(v(1).^2.0 + v(3).^2.0);
     else
         error('Argument must be 3x3xn or 3x3')
     end  
