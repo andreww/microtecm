@@ -100,6 +100,8 @@ function flinn(file)
     pbaspect('manual');
     pbaspect([1 1 1]);
     title(file)
+
+    
     subplot(3,3,4:6) 
     [x, y] = vort_xy(v, e);
     scatter(x, y ,20,1:length(x),'filled');
@@ -117,6 +119,9 @@ function flinn(file)
     %legend(file, 'simple shear', 'pure shear', ...
     %    'compression', 'extension');
     axis([0 maxplot 0 maxplot])
+    hold on
+    plot([0 maxplot], [1 1], '--')
+    
     xlabel('|v| / II_E projected onto e_1, e_3 plane')
     ylabel('|v_2| / II_E')
     pbaspect('manual');
