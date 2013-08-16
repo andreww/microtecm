@@ -36,6 +36,13 @@
 %         Mark the timestep of each velocity gradent tesnsor by a colour 
 %         (rather than the default vorticity number).
 %
+%     MVT_flinn(data, 'max_e', x)  
+%         Set the maximum value of the x and y axes in the Flinn plot.
+%
+%     MVT_flinn(data, 'max_v', x)  
+%         Set the maximum value of the x and y axes in the Vorticity plot
+%         and the color range if 'colourtime' is not set.
+%
 % See also: MVT_decompose_Lijs, MVT_strain_invariants, MVT_read_Lij_file
 
 % Copyright (c) 2013 Andrew Walker
@@ -76,6 +83,8 @@ function MVT_flinn(data, varargin)
 
       with_time = 0;
       flinn_only = 0;
+      max_e = NaN;
+      max_v = NaN;
       iarg = 1 ;
       while iarg <= (length(varargin))
          switch lower(varargin{iarg})
@@ -85,6 +94,12 @@ function MVT_flinn(data, varargin)
              case 'flinn_only'
                  flinn_only = 1;
                  iarg = iarg + 1;
+             case 'max_e'
+                 max_e = varargin{iarg+1};
+                 iarg = iarg + 2;
+             case 'max_v'
+                 max_v = varargin{iarg+1};
+                 iarg = iarg + 2;
              otherwise 
                 error(['Unknown option: ' varargin{iarg}]) ;   
          end   
@@ -120,7 +135,11 @@ function MVT_flinn(data, varargin)
         subplot(3,3,1:3)
     end
     [x, y] = flinn_xy(e);
-    maxplot = max([x y]);
+    if isnan(max_e)
+        maxplot = max([x y]);
+    else
+        maxplot = max_e;
+    end
     vecsize = length(x);
     if with_time
         scatter(x, y ,20,1:length(x),'filled');
@@ -140,6 +159,9 @@ function MVT_flinn(data, varargin)
         if with_time
             set(get(cba,'title'),'string','Time step');
         else
+            if ~isnan(max_v)
+                caxis([0 max_v])
+            end
             set(get(cba,'title'),'string','Vorticity number');
         end
     end
@@ -148,7 +170,11 @@ function MVT_flinn(data, varargin)
     if ~flinn_only
         subplot(3,3,4:6)
         [x, y] = vort_xy(v, e);
-        maxplot = max([x y]);
+        if isnan(max_e)
+            maxplot = max([x y]);
+        else
+            maxplot = max_v;
+        end
         axis([0 maxplot 0 maxplot])
         hold on
         plot([0 maxplot], [1 1], '--')
@@ -165,6 +191,9 @@ function MVT_flinn(data, varargin)
         if with_time
             set(get(cba,'title'),'string','Time step');
         else
+            if ~isnan(max_v)
+                caxis([0 max_v])
+            end
             set(get(cba,'title'),'string','Vorticity number');
         end
         
