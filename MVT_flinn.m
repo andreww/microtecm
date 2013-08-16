@@ -19,7 +19,8 @@
 % (the vorticity number) can be represented as the colour of the point 
 % on the Flinn diagram, or the vorticity can be plotted separately along
 % with a pole figure representing the orientation of the strain rate
-% ellipsoid.  
+% ellipsoid. Exactly what is plotted is set by optional arguments as
+% outlined below.
 %
 % Usage:
 %     MVT_flinn(data, ...)  
@@ -27,11 +28,69 @@
 %         tensors or a string representing a filename passed to 
 %         MVT_read_Lij_file: Generate a Flinn diagram as described above.
 %
+%     MVT_flinn(data, 'flinn_only', ...)  
+%         Only plot the Flinn diagram, not the vorticity plot or pole 
+%         figures (the default)
+%
+%     MVT_flinn(data, 'colourtime', ...)  
+%         Mark the timestep of each velocity gradent tesnsor by a colour 
+%         (rather than the default vorticity number).
+%
 % See also: MVT_decompose_Lijs, MVT_strain_invariants, MVT_read_Lij_file
 
-function MVT_flinn(data)
+% Copyright (c) 2013 Andrew Walker
+% All rights reserved.
+% 
+% Redistribution and use in source and binary forms, 
+% with or without modification, are permitted provided 
+% that the following conditions are met:
+% 
+%    * Redistributions of source code must retain the 
+%      above copyright notice, this list of conditions 
+%      and the following disclaimer.
+%    * Redistributions in binary form must reproduce 
+%      the above copyright notice, this list of conditions 
+%      and the following disclaimer in the documentation 
+%      and/or other materials provided with the distribution.
+%    * Neither the name of the University of Bristol nor the names 
+%      of its contributors may be used to endorse or promote 
+%      products derived from this software without specific 
+%      prior written permission.
+% 
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS 
+% AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED 
+% WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+% PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
+% THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY 
+% DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+% PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF 
+% USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+% CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
+% OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+% SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+function MVT_flinn(data, varargin)
 
+      with_time = 0;
+      flinn_only = 0;
+      iarg = 1 ;
+      while iarg <= (length(varargin))
+         switch lower(varargin{iarg})
+             case 'colourtime'
+               with_time = 1 ;
+               iarg = iarg + 1 ;
+             case 'flinn_only'
+                 flinn_only = 1;
+                 iarg = iarg + 1;
+             otherwise 
+                error(['Unknown option: ' varargin{iarg}]) ;   
+         end   
+      end 
+
+    % Get hold of the vel grad tensors.
     if ischar(data)
         Ls = MVT_read_Lij_file(data);
         file = data;
@@ -39,36 +98,8 @@ function MVT_flinn(data)
         Ls = data;
         file = '';
     end
-%     Ls = zeros(3,3,4);
-%     Ls(:,:,1) = [0   0.0010     0;...
-%                  0     0     0;...
-%                  0     0     0];
-%     Ls(:,:,2) = [0   0.0005     0;...
-%                  0     0     0;...
-%                  0     0     0];
-%     Ls(:,:,3) = [0   0.00025   0;...
-%                  0     0     0;...
-%                  0     0     0];
-%     Ls(:,:,4) = [0   0.000125  0;...
-%                  0     0     0;...
-%                  0     0     0];
+
     [Es, ~, e, v, RR] = MVT_decompose_Lijs(Ls);
-    
-    % Build some 'reference' points assuming maximum L in
-    % input file (to fit on graph)
-    lr = max(max(max(abs(Ls))));
-    % Simple shear
-    l_ss = [0 2*lr 0; 0 0 0; 0 0 0];
-    [~, ~, e_ss, v_ss, ~] = MVT_decompose_Lijs(l_ss);
-    %pure shear
-    l_ps = [lr 0 0; 0 0 0; 0 0 -lr];
-    [~, ~, e_ps, v_ps, ~] = MVT_decompose_Lijs(l_ps);
-    % Axial compression with rotation around e(3)
-    l_ac = [lr*0.5 lr*0.5 0; -lr*0.5 lr*0.5 0; 0 0 -lr];
-    [~, ~, e_ac, v_ac, ~] = MVT_decompose_Lijs(l_ac);
-    % Axial extension with rotation around e(2)
-    l_ae = [lr 0.0 lr*0.5; 0.0 -lr*0.5 0.0; -lr*0.5 0.0 -lr*0.5];
-    [~, ~, e_ae, v_ae, ~] = MVT_decompose_Lijs(l_ae);
     
     % Calculate vorticity number
     [~, II_E, ~] = MVT_strain_invariants(Es);
@@ -80,121 +111,100 @@ function MVT_flinn(data)
         v(2,i) = v(2,i)/sqrt(2*II_E(i));
         v(3,i) = v(3,i)/sqrt(2*II_E(i));
     end
-    % Plot vortnum flinn diag
-    figure()
-    [x, y] = flinn_xy(e);
-    maxplot = max([x y]);
-    %scatter(x, y ,20,1:length(x),'filled');
-    scatter(x, y ,20,vortnum,'filled');
-    hold on
-    plot([1 maxplot], [1 maxplot])
-    axis([1 maxplot 1 maxplot])
-%     [x, y] = flinn_xy(e_ss);
-%     scatter(x, y, 18, 'k', 's', 'filled');
-%     [x, y] = flinn_xy(e_ps);
-%     scatter(x, y ,22, 'r', 's');
-%     [x, y] = flinn_xy(e_ac);
-%     scatter(x, y ,18, 'r', 's', 'filled');
-%     [x, y] = flinn_xy(e_ae);
-%     scatter(x, y ,22, 'k', 's');
-    hold off
-    %legend(file, 'simple shear', 'pure shear', ...
-    %    'compression', 'extension');
-    xlabel('1+e_2 / 1+e_3')
-    ylabel('1+e_1 / 1+e_2')
-    pbaspect('manual');
-    pbaspect([1 1 1]);
-    cba = colorbar('EastOutside');
-    set(get(cba,'title'),'string','Vorticity number');
-    title(file)
-    
-    
+
     % Plot the flinn diagram
-    figure('Position',[100 100 500 1000])
-    subplot(3,3,1:3)
+    if flinn_only
+        figure
+    else
+        figure('Position',[100 100 500 1000])
+        subplot(3,3,1:3)
+    end
     [x, y] = flinn_xy(e);
     maxplot = max([x y]);
     vecsize = length(x);
-    scatter(x, y ,20,1:length(x),'filled');
+    if with_time
+        scatter(x, y ,20,1:length(x),'filled');
+    else
+        scatter(x, y ,20,vortnum,'filled');
+    end
     hold on
     plot([1 maxplot], [1 maxplot])
     axis([1 maxplot 1 maxplot])
-%     [x, y] = flinn_xy(e_ss);
-%     scatter(x, y, 18, 'k', 's', 'filled');
-%     [x, y] = flinn_xy(e_ps);
-%     scatter(x, y ,22, 'r', 's');
-%     [x, y] = flinn_xy(e_ac);
-%     scatter(x, y ,18, 'r', 's', 'filled');
-%     [x, y] = flinn_xy(e_ae);
-%     scatter(x, y ,22, 'k', 's');
     hold off
-    %legend(file, 'simple shear', 'pure shear', ...
-    %    'compression', 'extension');
     xlabel('1+e_2 / 1+e_3')
     ylabel('1+e_1 / 1+e_2')
     pbaspect('manual');
     pbaspect([1 1 1]);
+    if flinn_only
+        cba = colorbar('EastOutside');
+        if with_time
+            set(get(cba,'title'),'string','Time step');
+        else
+            set(get(cba,'title'),'string','Vorticity number');
+        end
+    end
     title(file)
 
-    
-    subplot(3,3,4:6) 
-    [x, y] = vort_xy(v, e);
-    scatter(x, y ,20,1:length(x),'filled');
-    maxplot = max([x y]);
-%     hold on
-%     [x, y] = vort_xy(v_ss, e_ss);
-%     scatter(x, y, 18, 'k', 's', 'filled');
-%     [x, y] = vort_xy(v_ps, e_ps);
-%     scatter(x, y ,22, 'r', 's');
-%     [x, y] = vort_xy(v_ac, e_ac);
-%     scatter(x, y ,18, 'r', 's', 'filled');
-%     [x, y] = vort_xy(v_ae, e_ae);
-%     scatter(x, y ,22, 'k', 's')
-%     hold off
-    %legend(file, 'simple shear', 'pure shear', ...
-    %    'compression', 'extension');
-    axis([0 maxplot 0 maxplot])
-    hold on
-    plot([0 maxplot], [1 1], '--')
-    
-    xlabel('|v| / II_E projected onto e_1, e_3 plane')
-    ylabel('|v_2| / II_E')
-    pbaspect('manual');
-    pbaspect([1 1 1]);
-    cba = colorbar('EastOutside');
-    set(get(cba,'title'),'string','Time step');
-    
-    % Knock up a pole figure...
-    % Note that we transpose R here - which is what happens for texture
-    % pole figures too - or not...
-    e1axis(vecsize) = vector3d(0,0,0);
-    e2axis(vecsize) = vector3d(0,0,0);
-    e3axis(vecsize) = vector3d(0,0,0);
-    for i = 1:vecsize
-        e1axis(i) = xvector*RR(1,1,i)+yvector*RR(2,1,i)+zvector*RR(3,1,i);
-        e2axis(i) = xvector*RR(1,2,i)+yvector*RR(2,2,i)+zvector*RR(3,2,i);
-        e3axis(i) = xvector*RR(1,3,i)+yvector*RR(2,3,i)+zvector*RR(3,3,i);
+    if ~flinn_only
+        subplot(3,3,4:6)
+        [x, y] = vort_xy(v, e);
+        maxplot = max([x y]);
+        axis([0 maxplot 0 maxplot])
+        hold on
+        plot([0 maxplot], [1 1], '--')
+        if with_time
+            scatter(x, y ,20,1:length(x),'filled');
+        else
+            scatter(x, y ,20,vortnum,'filled');
+        end
+        xlabel('|v| / II_E projected onto e_1, e_3 plane')
+        ylabel('|v_2| / II_E')
+        pbaspect('manual');
+        pbaspect([1 1 1]);
+        cba = colorbar('EastOutside');
+        if with_time
+            set(get(cba,'title'),'string','Time step');
+        else
+            set(get(cba,'title'),'string','Vorticity number');
+        end
+        
+        % Knock up a pole figure...
+        % Note that we transpose R here - which is what happens for texture
+        % pole figures too - or not...
+        e1axis(vecsize) = vector3d(0,0,0);
+        e2axis(vecsize) = vector3d(0,0,0);
+        e3axis(vecsize) = vector3d(0,0,0);
+        for i = 1:vecsize
+            e1axis(i) = xvector*RR(1,1,i)+yvector*RR(2,1,i)+zvector*RR(3,1,i);
+            e2axis(i) = xvector*RR(1,2,i)+yvector*RR(2,2,i)+zvector*RR(3,2,i);
+            e3axis(i) = xvector*RR(1,3,i)+yvector*RR(2,3,i)+zvector*RR(3,3,i);
+        end
+        cmap=colormap(jet);
+        if with_time
+            cmap = interp1((1:length(cmap))./(length(cmap)), cmap, ...
+                ((1:vecsize)./vecsize), 'linear', 'extrap');
+        else
+            cmap = zeros(vecsize, 3);
+        end
+        subplot(3,3,7);
+        for i = 1:vecsize
+            plot(e1axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
+            hold on;
+        end
+        title('e1');
+        subplot(3,3,8);
+        for i = 1:vecsize
+            plot(e2axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
+            hold on;
+        end
+        title('e2');
+        subplot(3,3,9);
+        for i = 1:vecsize
+            plot(e3axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
+            hold on;
+        end
+        title('e3');
     end
-    cmap=colormap(jet);
-    cmap = interp1((1:length(cmap))./(length(cmap)), cmap, ((1:vecsize)./vecsize), 'linear', 'extrap');
-    subplot(3,3,7);
-    for i = 1:vecsize
-        plot(e1axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
-        hold on;
-    end
-    title('e1');
-    subplot(3,3,8);
-    for i = 1:vecsize
-        plot(e2axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
-        hold on;
-    end
-    title('e2');
-    subplot(3,3,9);
-    for i = 1:vecsize
-        plot(e3axis(i),'MarkerSize',4,'MarkerFaceColor', cmap(i,:), 'antipodal', 'axis', gca);
-        hold on;
-    end
-    title('e3');
 end
 
 function [x, y] = flinn_xy(e)
