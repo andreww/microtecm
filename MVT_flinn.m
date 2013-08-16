@@ -1,9 +1,44 @@
-% Plot a flinn type diagram thing...
+% MVT_flinn - Plot Flinn-like diagrams from velocity gradient tensors
+% 
+% Generate a plot motivated by the classic Flinn diagram from structural
+% geology. The basic idea is to extract the principal strains and plot
+% e_1/e_2 on the y-axis and e_2/e_3 on the x-axis. Points plotting on the 
+% line x=y then correspond to plane strain, points plotting on line x=0 
+% correspond to axial extension and points plotting on the line y=0
+% correspond to axial compression. This basic idea is extended to cope with
+% strain rates and vorticity as follows.
+%
+% First, the velocity gradient tensor(s) are decomposed into three principle
+% strain rates (e), components of the vorticity vector (v), and a matrix 
+% representing the orientation of the strain rate ellipsoid. See
+% MVT_decompose_Lijs. For the Flinn diagram, points are plotted on a graph
+% where y=(1+e(1))/(1+e(2)) and x=(1+e(2))/(1+e(3)), i.e. we plot the strain
+% expected after unit time. The vorticity vector is normalised by the second
+% invariant of the strain rate tensor such that the vorticity vector for 
+% simple shear will be (0.0 1.0 0.0). The magnitude of the vorticity vector
+% (the vorticity number) can be represented as the colour of the point 
+% on the Flinn diagram, or the vorticity can be plotted separately along
+% with a pole figure representing the orientation of the strain rate
+% ellipsoid.  
+%
+% Usage:
+%     MVT_flinn(data, ...)  
+%         Where data is either a size (3,3,n) array of velocity gradient 
+%         tensors or a string representing a filename passed to 
+%         MVT_read_Lij_file: Generate a Flinn diagram as described above.
+%
+% See also: MVT_decompose_Lijs, MVT_strain_invariants, MVT_read_Lij_file
 
-function flinn(file)
+function MVT_flinn(data)
 
 
-    Ls = MVT_read_Lij_file(file);
+    if ischar(data)
+        Ls = MVT_read_Lij_file(data);
+        file = data;
+    else
+        Ls = data;
+        file = '';
+    end
 %     Ls = zeros(3,3,4);
 %     Ls(:,:,1) = [0   0.0010     0;...
 %                  0     0     0;...
