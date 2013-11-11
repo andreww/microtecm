@@ -88,7 +88,7 @@ function [eulers, nxtl] = MVT_read_VPSC_file(filename)
             eulers = {eulers};
             nxtl = {nxtl};
             eulers(2) = {tmp_eulers};
-            nxtl(2) = {nxtl};
+            nxtl(2) = {tmp_nxtl};
         else
             eulers(blocks) = {tmp_eulers};
             nxtl(blocks) = {tmp_nxtl};
