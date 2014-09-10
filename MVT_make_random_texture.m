@@ -4,10 +4,10 @@
 % a random uniform texture of nxtl crystals. 
 % 
 % Usage: 
-%     [ eulers ] = MVT_read_VPSC_file( nxtl )
+%     [ eulers ] = MVT_make_random_texture( nxtl )
 %         Use the default Matlab PRN generator.
 % 
-%     [ eulers ] = MVT_read_VPSC_file( nxtl, 'stream', @RandStream )
+%     [ eulers ] = MVT_make_random_texture( nxtl, 'stream', @RandStream )
 %         Use the provided PRN generator (which must be 
 %         created by the user).
 %
