@@ -50,7 +50,7 @@
 function [eulers] = MVT_make_random_texture(nxtl, varargin)
 
     % Default PRN stream
-    stream = RandStream.getDefaultStream;
+    stream = RandStream.getGlobalStream;
 
     % Process the optional arguments
     iarg = 1 ;
