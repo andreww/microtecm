@@ -75,7 +75,7 @@ function MVT_plot_pole_figure(eulers, CS, SS, varargin)
     write_file = 0;
     filename = '';
     fileformat = '';
-    axes = [Miller(1,0,0),Miller(0,1,0),Miller(0,0,1)];
+    axes = [Miller(1,0,0,CS),Miller(0,1,0,CS),Miller(0,0,1,CS)];
     
     % Process the optional arguments
     iarg = 1 ;
@@ -130,11 +130,10 @@ function MVT_plot_pole_figure(eulers, CS, SS, varargin)
     
     % Generate a list of orientation objects and an ebsd wrapper
     o = orientation('Euler', eulers_r(1,:), eulers_r(2,:), ...
-        eulers_r(3,:), CS,SS, 'Bunge');
-    ebsd = EBSD(o);
+        eulers_r(3,:), CS, SS, 'Bunge');
     
     % Fit an ODF
-    odf = calcODF(ebsd,'HALFWIDTH', 10*degree, 'silent');
+    odf = calcODF(o,'HALFWIDTH', 10*degree, 'silent');
     
     % Make a new figure and plot three pole figures in it...
     scrsz = get(0,'ScreenSize');
@@ -142,10 +141,10 @@ function MVT_plot_pole_figure(eulers, CS, SS, varargin)
     h = figure('Position',[1 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2]); 
     
     if fix_scale
-        plotpdf(odf,axes, ...
+        plotPDF(odf,axes, ...
             'antipodal','silent', 'colorrange', scale_setting);
     else
-        plotpdf(odf,axes, ...
+        plotPDF(odf,axes, ...
         'antipodal','silent');
     end
     

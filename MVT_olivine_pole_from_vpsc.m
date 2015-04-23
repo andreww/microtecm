@@ -61,8 +61,8 @@
 
 function MVT_olivine_pole_from_vpsc(filename, varargin)
 
-    CS = symmetry('Pbnm', [4.75, 10.20, 5.98]);
-    SS = symmetry('-1');
+    CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
+    SS = specimenSymmetry('-1');
     
     [eulers, ~] = MVT_read_VPSC_file(filename);
     
